@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "server": "nodemon server",
-    "start": "npm start",
-    "build": "npm run build"
+    "start": "nodemon --watch backend --exec babel-node server.js",
+    "build": "npm install && npm run build",
+    "serve": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
