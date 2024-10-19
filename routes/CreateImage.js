@@ -1,13 +1,12 @@
 const express = require("express")
 const router = express.Router()
-const { Configuration, OpenAIApi } = require("openai");
+const OpenAI = require("openai");
 
-const configuration = new Configuration({
-    apiKey:process.env.OPENAI_API_KEY,
+
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY, // Zameni sa svojim API ključem
 });
-
-const openai = new OpenAIApi(configuration);
-
 router.get('/' , async (req,res)=>{
     res.status(200).send({
         message:"Hello from Codex",
@@ -17,14 +16,16 @@ router.get('/' , async (req,res)=>{
 router.post('/', async (req,res) => {
     try {
         const prompt = req.body.prompt;
-        const response = await openai.createImage({
-            prompt: prompt,
-            n: 1,
-            size: "256x256",
+        const response = await openai.images.generate({
+            //prompt: prompt,
+            model:"dall-e-2",
+            prompt:prompt,
+            size:"256x256",
+            quality:"standard"
           });
         //console.log(response.data);
         res.status(200).send({
-            bot:response.data
+            bot:response.data[0].url
         })
     } catch (error) {
         console.log(error);

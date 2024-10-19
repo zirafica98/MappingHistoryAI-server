@@ -1,12 +1,17 @@
 const express = require("express")
 const router = express.Router()
-const { Configuration, OpenAIApi } = require("openai");
+//const { Configuration, OpenAIApi } = require("openai");
 
-const configuration = new Configuration({
-    apiKey:process.env.OPENAI_API_KEY,
+// const configuration = new Configuration({
+//     apiKey:process.env.OPENAI_API_KEY,
+// });
+
+//const openai = new OpenAIApi(configuration);
+
+const OpenAI = require("openai");
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY, // Zameni sa svojim API ključem
 });
-
-const openai = new OpenAIApi(configuration);
 
 router.get('/' , async (req,res)=>{
     res.status(200).send({
@@ -14,28 +19,35 @@ router.get('/' , async (req,res)=>{
     })
 })
 
-router.post('/', async (req,res) => {
-    try {
-        const prompt = req.body.prompt;
-        const response = await openai.createCompletion({
-            model: "text-davinci-003",
-            //model: "gpt-3.5-turbo-0301",
-            prompt: `${prompt}`,
-            temperature: 0.5, // Higher values means the model will take more risks.
-            max_tokens: 1400, // The maximum opennumber of tokens to generate in the completion. Most models have a context length of 2048 tokens (except for the newest models, which support 4096).
-            //top_p: 1, // alternative to sampling with temperature, called nucleus sampling
-            frequency_penalty: 0, // Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.
-            presence_penalty: 0, // Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.
-          });
+router.post('/', async (req, res) => {
+    const userInput = req.body.prompt;
 
-        res.status(200).send({
-            bot:response.data.choices[0].text
-        })
+    try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [{ role: "user", content: userInput }]
+            })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error.message);
+        }
+
+        const gptResponse = data.choices[0].message.content;
+        res.json({ response: gptResponse });
     } catch (error) {
-        console.log(error);
-        res.status(500).send({error})
+        console.error('Greška:', error);
+        res.status(500).send('Došlo je do greške: ' + error.message);
     }
-})
+});
 
 
 
