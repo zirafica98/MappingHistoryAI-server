@@ -4,7 +4,7 @@
   "description": "A simple Node.js server application",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon --watch backend --exec babel-node server.js",
+    "start": "node server.js",
     "build": "npx babel src -d dist",
     "serve": "node dist/server.js",
     "dev": "nodemon server.js",
